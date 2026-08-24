@@ -1,762 +1,1616 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tunz Flashcards - Học Từ Vựng Phong Cách Quizlet</title>
     <!-- Google Fonts & FontAwesome Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <!-- Tesseract.js cho OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
-        :root {
-            --primary: #4255ff;
-            --primary-light: #eef2ff;
-            --primary-dark: #2b39c0;
-            --secondary: #ffcd1f;
-            --accent-green: #23b26d;
-            --accent-red: #ff5e5e;
-            --bg: #f6f7fb;
-            --card-bg: #ffffff;
-            --text-main: #1a1d2e;
-            --text-sub: #646f8c;
-            --border: #e2e8f0;
-            --radius-lg: 20px;
-            --radius-md: 12px;
-            --shadow-sm: 0 4px 12px rgba(0,0,0,0.03);
-            --shadow-md: 0 10px 25px rgba(66, 85, 255, 0.08);
-            --shadow-lg: 0 20px 35px rgba(0,0,0,0.08);
+      :root {
+        --primary: #4255ff;
+        --primary-light: #eef2ff;
+        --primary-dark: #2b39c0;
+        --secondary: #ffcd1f;
+        --accent-green: #23b26d;
+        --accent-red: #ff5e5e;
+        --bg: #f6f7fb;
+        --card-bg: #ffffff;
+        --text-main: #1a1d2e;
+        --text-sub: #646f8c;
+        --border: #e2e8f0;
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+        --shadow-md: 0 10px 25px rgba(66, 85, 255, 0.08);
+        --shadow-lg: 0 20px 35px rgba(0, 0, 0, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      body {
+        background-color: var(--bg);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding-bottom: 40px;
+      }
+
+      /* HEADER & NAVBAR */
+      header {
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-sm);
+      }
+      .header-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        text-decoration: none;
+      }
+      .logo i {
+        font-size: 1.8rem;
+        color: var(--secondary);
+        background: var(--primary);
+        padding: 8px;
+        border-radius: 12px;
+      }
+
+      /* TOPIC SELECTOR IN HEADER */
+      .topic-selector-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--primary-light);
+        padding: 6px 14px;
+        border-radius: 30px;
+      }
+      .topic-selector-wrapper label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+      }
+      .topic-select {
+        background: transparent;
+        border: none;
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        padding-right: 10px;
+      }
+
+      /* CONTAINER & TABS */
+      .main-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      .nav-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: var(--shadow-sm);
+      }
+      .tab-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-2px);
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: var(--shadow-md);
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.35s ease;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 40px; }
+      /* TOPIC MANAGEMENT SECTION */
+      .section-card {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-        /* HEADER & NAVBAR */
-        header {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: var(--shadow-sm);
+      .grid-topics {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 15px;
+      }
+      .topic-card {
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+      .topic-card:hover {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        transform: translateY(-3px);
+      }
+      .topic-card.active {
+        border-color: var(--primary);
+        background: #f0f3ff;
+      }
+      .topic-card h4 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text-main);
+      }
+      .topic-card p {
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+      .topic-card .badge {
+        display: inline-block;
+        background: var(--primary);
+        color: white;
+        font-size: 0.75rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-top: 8px;
+        font-weight: 700;
+      }
+      .btn-delete-topic {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        color: var(--text-sub);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 0.9rem;
+        opacity: 0.6;
+      }
+      .btn-delete-topic:hover {
+        color: var(--accent-red);
+        opacity: 1;
+      }
+
+      /* INPUTS & BUTTONS */
+      .form-group {
+        margin-bottom: 18px;
+      }
+      label {
+        display: block;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        color: var(--text-main);
+      }
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.2s;
+        font-weight: 600;
+      }
+      input[type="text"]:focus {
+        border-color: var(--primary);
+        background: #fafbff;
+      }
+
+      .btn {
+        background: var(--primary);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(66, 85, 255, 0.3);
+      }
+      .btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(66, 85, 255, 0.4);
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: var(--text-main);
+        box-shadow: none;
+      }
+      .btn-secondary:hover {
+        background: #cbd5e1;
+        color: var(--text-main);
+        box-shadow: none;
+      }
+      .btn-success {
+        background: var(--accent-green);
+        box-shadow: 0 4px 14px rgba(35, 178, 109, 0.3);
+      }
+      .btn-success:hover {
+        background: #1c985c;
+      }
+
+      /* UPLOAD & SCAN OCR SECTION */
+      .upload-area {
+        border: 2px dashed var(--primary);
+        background: var(--primary-light);
+        padding: 30px;
+        border-radius: var(--radius-md);
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-bottom: 20px;
+      }
+      .upload-area:hover {
+        background: #e0e7ff;
+      }
+      .upload-area i {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+
+      /* TABLE FOR DETECTED WORDS */
+      .detected-words-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-top: 15px;
+      }
+      .detected-words-table th {
+        text-align: left;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        text-transform: uppercase;
+      }
+      .detected-words-table td {
+        background: var(--bg);
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .detected-words-table tr td:first-child {
+        border-left: 1px solid var(--border);
+        border-radius: 10px 0 0 10px;
+        font-weight: 700;
+        color: var(--primary);
+        width: 45%;
+      }
+      .detected-words-table tr td:last-child {
+        border-right: 1px solid var(--border);
+        border-radius: 0 10px 10px 0;
+      }
+      .detected-words-table input {
+        border: 1px solid var(--border);
+        padding: 8px 12px;
+        background: white;
+      }
+
+      /* FLASHCARD STYLES (QUIZLET LOOK) */
+      .flashcard-wrapper {
+        perspective: 1000px;
+        height: 380px;
+        margin: 0 auto 25px;
+        max-width: 650px;
+      }
+      .flashcard {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        cursor: pointer;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+      .flashcard.flipped {
+        transform: rotateY(180deg);
+      }
+
+      .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: var(--radius-lg);
+        background: var(--card-bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        text-align: center;
+        border: 2px solid var(--border);
+      }
+      .card-back {
+        transform: rotateY(180deg);
+        background: #fafbff;
+        border-color: var(--primary);
+      }
+      .card-face .tag {
+        position: absolute;
+        top: 20px;
+        left: 24px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .card-face .btn-sound {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        background: var(--primary-light);
+        border: none;
+        color: var(--primary);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card-face .btn-sound:hover {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .card-word {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 10px;
+      }
+      .card-meaning {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .hint-text {
+        position: absolute;
+        bottom: 20px;
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        font-weight: 600;
+      }
+
+      .card-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+      .card-counter {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--text-sub);
+        min-width: 80px;
+        text-align: center;
+      }
+
+      /* GAME MODE SELECTOR & CONTAINERS */
+      .game-mode-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+      .game-mode-btn {
+        background: var(--bg);
+        border: 2px solid var(--border);
+        padding: 10px 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .game-mode-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .game-mode-btn.active {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      /* MATCHING GAME STYLES */
+      .game-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+      .game-card {
+        background: var(--card-bg);
+        height: 120px;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+        user-select: none;
+      }
+      .game-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+      .game-card.selected {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+        transform: scale(1.03);
+      }
+      .game-card.matched {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.4s ease;
+      }
+
+      /* MULTIPLE CHOICE GAME STYLES */
+      .quiz-container {
+        max-width: 600px;
+        margin: 20px auto 0;
+        text-align: center;
+      }
+      .quiz-score-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        color: var(--text-sub);
+        margin-bottom: 15px;
+      }
+      .quiz-word-box {
+        background: var(--primary-light);
+        border: 2px solid var(--primary);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+      }
+      .quiz-word-box h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary);
+      }
+      .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .quiz-option-btn {
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        padding: 16px 20px;
+        border-radius: var(--radius-md);
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: var(--shadow-sm);
+      }
+      .quiz-option-btn:hover {
+        border-color: var(--primary);
+        background: #fafbff;
+        transform: translateX(5px);
+      }
+      .quiz-option-btn .opt-badge {
+        background: var(--bg);
+        color: var(--text-sub);
+        font-size: 0.85rem;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 800;
+      }
+      .quiz-option-btn.correct {
+        background: #dcfce7 !important;
+        border-color: var(--accent-green) !important;
+        color: #15803d !important;
+      }
+      .quiz-option-btn.wrong {
+        background: #fee2e2 !important;
+        border-color: var(--accent-red) !important;
+        color: #b91c1c !important;
+      }
+
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: var(--primary);
+        font-weight: 700;
+      }
+      .loading-spinner i {
+        font-size: 2rem;
+        animation: spin 1s infinite linear;
+        margin-bottom: 10px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* VOCABULARY LIST MANAGEMENT */
+      .vocab-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        background: var(--bg);
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+      }
+      .vocab-item-row strong {
+        font-size: 1.05rem;
+        color: var(--primary);
+      }
+      .vocab-item-row span {
+        color: var(--text-main);
+        font-weight: 600;
+      }
+
+      @media (max-width: 600px) {
+        .flashcard-wrapper {
+          height: 300px;
+        }
+        .card-word {
+          font-size: 2rem;
+        }
+        .card-meaning {
+          font-size: 1.6rem;
         }
         .header-container {
-            max-width: 1100px; margin: 0 auto; padding: 16px 24px;
-            display: flex; align-items: center; justify-content: space-between;
+          flex-direction: column;
+          gap: 12px;
         }
-        .logo {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 1.5rem; font-weight: 800; color: var(--primary);
-            text-decoration: none;
-        }
-        .logo i { font-size: 1.8rem; color: var(--secondary); background: var(--primary); padding: 8px; border-radius: 12px; }
-
-        /* TOPIC SELECTOR IN HEADER */
-        .topic-selector-wrapper {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--primary-light); padding: 6px 14px; border-radius: 30px;
-        }
-        .topic-selector-wrapper label { font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
-        .topic-select {
-            background: transparent; border: none; font-weight: 700; color: var(--text-main);
-            font-size: 0.95rem; cursor: pointer; outline: none; padding-right: 10px;
-        }
-
-        /* CONTAINER & TABS */
-        .main-container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-
-        .nav-tabs {
-            display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: var(--card-bg); border: 2px solid var(--border);
-            padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 0.95rem;
-            color: var(--text-sub); cursor: pointer; transition: all 0.25s ease;
-            display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
-        }
-        .tab-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: var(--shadow-md); }
-
-        .tab-content { display: none; animation: fadeIn 0.35s ease; }
-        .tab-content.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* TOPIC MANAGEMENT SECTION */
-        .section-card {
-            background: var(--card-bg); border-radius: var(--radius-lg);
-            padding: 28px; box-shadow: var(--shadow-md); margin-bottom: 24px; border: 1px solid var(--border);
-        }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-        
-        .grid-topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 15px; }
-        .topic-card {
-            background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-md);
-            padding: 18px; cursor: pointer; transition: all 0.2s ease; position: relative;
-        }
-        .topic-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-3px); }
-        .topic-card.active { border-color: var(--primary); background: #f0f3ff; }
-        .topic-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
-        .topic-card p { font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
-        .topic-card .badge {
-            display: inline-block; background: var(--primary); color: white;
-            font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; margin-top: 8px; font-weight: 700;
-        }
-        .btn-delete-topic {
-            position: absolute; top: 12px; right: 12px; color: var(--text-sub);
-            border: none; background: transparent; cursor: pointer; font-size: 0.9rem; opacity: 0.6;
-        }
-        .btn-delete-topic:hover { color: var(--accent-red); opacity: 1; }
-
-        /* INPUTS & BUTTONS */
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-main); }
-        input[type="text"], select {
-            width: 100%; padding: 12px 16px; border: 2px solid var(--border);
-            border-radius: var(--radius-md); font-size: 0.95rem; outline: none; transition: 0.2s;
-            font-weight: 600;
-        }
-        input[type="text"]:focus { border-color: var(--primary); background: #fafbff; }
-        
-        .btn {
-            background: var(--primary); color: white; padding: 12px 24px; border: none;
-            border-radius: 30px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(66, 85, 255, 0.3);
-        }
-        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(66, 85, 255, 0.4); }
-        .btn-secondary { background: #e2e8f0; color: var(--text-main); box-shadow: none; }
-        .btn-secondary:hover { background: #cbd5e1; color: var(--text-main); box-shadow: none; }
-        .btn-success { background: var(--accent-green); box-shadow: 0 4px 14px rgba(35, 178, 109, 0.3); }
-        .btn-success:hover { background: #1c985c; }
-
-        /* UPLOAD & SCAN OCR SECTION */
-        .upload-area {
-            border: 2px dashed var(--primary); background: var(--primary-light);
-            padding: 30px; border-radius: var(--radius-md); text-align: center; cursor: pointer;
-            transition: 0.2s; margin-bottom: 20px;
-        }
-        .upload-area:hover { background: #e0e7ff; }
-        .upload-area i { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
-        
-        /* TABLE FOR DETECTED WORDS */
-        .detected-words-table {
-            width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 15px;
-        }
-        .detected-words-table th { text-align: left; padding: 10px 14px; font-size: 0.85rem; color: var(--text-sub); text-transform: uppercase; }
-        .detected-words-table td {
-            background: var(--bg); padding: 12px 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-        }
-        .detected-words-table tr td:first-child { border-left: 1px solid var(--border); border-radius: 10px 0 0 10px; font-weight: 700; color: var(--primary); width: 45%; }
-        .detected-words-table tr td:last-child { border-right: 1px solid var(--border); border-radius: 0 10px 10px 0; }
-        .detected-words-table input { border: 1px solid var(--border); padding: 8px 12px; background: white; }
-
-        /* FLASHCARD STYLES (QUIZLET LOOK) */
-        .flashcard-wrapper {
-            perspective: 1000px; height: 380px; margin: 0 auto 25px; max-width: 650px;
-        }
-        .flashcard {
-            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); cursor: pointer;
-            border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-        }
-        .flashcard.flipped { transform: rotateY(180deg); }
-        
-        .card-face {
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-            border-radius: var(--radius-lg); background: var(--card-bg);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px; text-align: center; border: 2px solid var(--border);
-        }
-        .card-back { transform: rotateY(180deg); background: #fafbff; border-color: var(--primary); }
-        .card-face .tag {
-            position: absolute; top: 20px; left: 24px; font-size: 0.8rem; font-weight: 800;
-            color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px;
-        }
-        .card-face .btn-sound {
-            position: absolute; top: 16px; right: 20px; background: var(--primary-light);
-            border: none; color: var(--primary); width: 44px; height: 44px; border-radius: 50%;
-            cursor: pointer; font-size: 1.1rem; transition: 0.2s; display: flex; align-items: center; justify-content: center;
-        }
-        .card-face .btn-sound:hover { background: var(--primary); color: white; transform: scale(1.1); }
-
-        .card-word { font-size: 2.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
-        .card-meaning { font-size: 2.2rem; font-weight: 700; color: var(--primary); }
-        .hint-text { position: absolute; bottom: 20px; font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
-
-        .card-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
-        .card-counter { font-weight: 800; font-size: 1.1rem; color: var(--text-sub); min-width: 80px; text-align: center; }
-
-        /* MATCHING GAME STYLES */
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-top: 20px; }
-        .game-card {
-            background: var(--card-bg); height: 120px; border-radius: var(--radius-md);
-            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-            padding: 15px; font-weight: 700; font-size: 1.05rem; text-align: center; cursor: pointer;
-            transition: all 0.2s ease; box-shadow: var(--shadow-sm); user-select: none;
-        }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .game-card.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); transform: scale(1.03); }
-        .game-card.matched { visibility: hidden; opacity: 0; pointer-events: none; transition: 0.4s ease; }
-
-        .loading-spinner {
-            display: none; text-align: center; padding: 20px; color: var(--primary); font-weight: 700;
-        }
-        .loading-spinner i { font-size: 2rem; animation: spin 1s infinite linear; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* VOCABULARY LIST MANAGEMENT */
-        .vocab-item-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 18px; background: var(--bg); border-radius: var(--radius-md);
-            margin-bottom: 10px; border: 1px solid var(--border);
-        }
-        .vocab-item-row strong { font-size: 1.05rem; color: var(--primary); }
-        .vocab-item-row span { color: var(--text-main); font-weight: 600; }
-
-        @media (max-width: 600px) {
-            .flashcard-wrapper { height: 300px; }
-            .card-word { font-size: 2rem; }
-            .card-meaning { font-size: 1.6rem; }
-            .header-container { flex-direction: column; gap: 12px; }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- HEADER NAVIGATION -->
     <header>
-        <div class="header-container">
-            <a href="#" class="logo">
-                <i class="fa-solid fa-bolt"></i>
-                <span>Tunz Learn</span>
-            </a>
+      <div class="header-container">
+        <a href="#" class="logo">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Tunz Learn</span>
+        </a>
 
-            <!-- TOPIC SELECTOR IN HEADER -->
-            <div class="topic-selector-wrapper">
-                <label><i class="fa-solid fa-folder-open"></i> Bài học:</label>
-                <select id="headerTopicSelect" class="topic-select" onchange="changeActiveTopic(this.value)">
-                    <!-- Options populated via JS -->
-                </select>
-            </div>
+        <!-- TOPIC SELECTOR IN HEADER -->
+        <div class="topic-selector-wrapper">
+          <label><i class="fa-solid fa-folder-open"></i> Bài học:</label>
+          <select
+            id="headerTopicSelect"
+            class="topic-select"
+            onchange="changeActiveTopic(this.value)"
+          >
+            <!-- Options populated via JS -->
+          </select>
         </div>
+      </div>
     </header>
 
     <div class="main-container">
-        
-        <!-- TABS MENU -->
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('flashcards-tab')">
-                <i class="fa-solid fa-layer-group"></i> Flashcards
+      <!-- TABS MENU -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('flashcards-tab')">
+          <i class="fa-solid fa-layer-group"></i> Flashcards
+        </button>
+        <button class="tab-btn" onclick="switchTab('game-tab')">
+          <i class="fa-solid fa-gamepad"></i> Trò chơi Ghi nhớ
+        </button>
+        <button class="tab-btn" onclick="switchTab('ocr-tab')">
+          <i class="fa-solid fa-camera-retro"></i> Quét ảnh từ vựng
+        </button>
+        <button class="tab-btn" onclick="switchTab('topics-tab')">
+          <i class="fa-solid fa-folder-plus"></i> Quản lý Chủ đề
+        </button>
+      </div>
+
+      <!-- ================= TAB 1: FLASHCARDS ================= -->
+      <div id="flashcards-tab" class="tab-content active">
+        <div class="flashcard-wrapper">
+          <div class="flashcard" id="mainFlashcard" onclick="flipFlashcard()">
+            <div class="card-face card-front">
+              <span class="tag">Tiếng Anh</span>
+              <button
+                class="btn-sound"
+                onclick="speakCurrentWord(event)"
+                title="Phát âm"
+              >
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <div class="card-word" id="cardEnglish">Loading...</div>
+              <span class="hint-text"
+                ><i class="fa-solid fa-rotate"></i> Nhấn để xem nghĩa Tiếng
+                Việt</span
+              >
+            </div>
+            <div class="card-face card-back">
+              <span class="tag">Nghĩa Tiếng Việt</span>
+              <button
+                class="btn-sound"
+                onclick="speakCurrentWord(event)"
+                title="Phát âm"
+              >
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <div class="card-meaning" id="cardVietnamese">Đang tải...</div>
+              <span class="hint-text"
+                ><i class="fa-solid fa-rotate"></i> Nhấn để quay lại</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="card-controls">
+          <button class="btn btn-secondary" onclick="prevCard()">
+            <i class="fa-solid fa-arrow-left"></i> Trước
+          </button>
+          <div class="card-counter" id="cardCounter">0 / 0</div>
+          <button class="btn" onclick="nextCard()">
+            Tiếp theo <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= TAB 2: GAMES (MATCHING & MULTIPLE CHOICE) ================= -->
+      <div id="game-tab" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <i
+                class="fa-solid fa-puzzle-piece"
+                style="color: var(--primary)"
+              ></i>
+              Trò chơi ôn tập
+            </div>
+            <button class="btn" onclick="restartCurrentGame()">
+              <i class="fa-solid fa-arrows-rotate"></i> Chơi mới
             </button>
-            <button class="tab-btn" onclick="switchTab('game-tab')">
-                <i class="fa-solid fa-gamepad"></i> Trò chơi Ghép từ
+          </div>
+
+          <!-- GAME MODE SELECTOR -->
+          <div class="game-mode-selector">
+            <button
+              class="game-mode-btn active"
+              id="btnModeQuiz"
+              onclick="switchGameMode('quiz')"
+            >
+              <i class="fa-solid fa-list-check"></i> Trắc nghiệm (3 Đáp án)
             </button>
-            <button class="tab-btn" onclick="switchTab('ocr-tab')">
-                <i class="fa-solid fa-camera-retro"></i> Quét ảnh từ vựng
+            <button
+              class="game-mode-btn"
+              id="btnModeMatching"
+              onclick="switchGameMode('matching')"
+            >
+              <i class="fa-solid fa-border-all"></i> Ghép ô Nối từ
             </button>
-            <button class="tab-btn" onclick="switchTab('topics-tab')">
-                <i class="fa-solid fa-folder-plus"></i> Quản lý Chủ đề
+          </div>
+
+          <!-- MODE 1: MULTIPLE CHOICE QUIZ -->
+          <div id="quizGameContainer" class="quiz-container">
+            <div class="quiz-score-header">
+              <span
+                >Câu hỏi: <span id="quizCurrentIndex">1</span>/<span
+                  id="quizTotalCount"
+                  >0</span
+                ></span
+              >
+              <span
+                >Điểm:
+                <span
+                  id="quizScoreText"
+                  style="color: var(--primary); font-size: 1.1rem"
+                  >0</span
+                ></span
+              >
+            </div>
+
+            <div class="quiz-word-box">
+              <button
+                class="btn-sound"
+                onclick="speakQuizWord()"
+                style="
+                  position: absolute;
+                  top: 15px;
+                  right: 15px;
+                  background: white;
+                  border: none;
+                  color: var(--primary);
+                  width: 36px;
+                  height: 36px;
+                  border-radius: 50%;
+                  cursor: pointer;
+                "
+              >
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <span
+                style="
+                  font-weight: 700;
+                  color: var(--text-sub);
+                  font-size: 0.85rem;
+                  text-transform: uppercase;
+                "
+                >Nghĩa của từ này là gì?</span
+              >
+              <h2 id="quizQuestionWord" style="margin-top: 10px">Word</h2>
+            </div>
+
+            <div class="quiz-options" id="quizOptionsContainer">
+              <!-- 3 Option Buttons populated via JS -->
+            </div>
+          </div>
+
+          <!-- MODE 2: MATCHING GAME -->
+          <div id="matchingGameContainer" style="display: none">
+            <p
+              style="
+                color: var(--text-sub);
+                font-weight: 600;
+                margin-bottom: 15px;
+                text-align: center;
+              "
+            >
+              Nối ô Tiếng Anh với nghĩa Tiếng Việt tương ứng nhanh nhất có thể!
+            </p>
+            <div class="game-grid" id="gameGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TAB 3: SCAN OCR FROM IMAGE ================= -->
+      <div id="ocr-tab" class="tab-content">
+        <div class="section-card">
+          <div class="section-title" style="margin-bottom: 15px">
+            <i class="fa-solid fa-file-image" style="color: var(--primary)"></i>
+            Trích xuất & Dịch từ vựng từ ảnh
+          </div>
+
+          <div
+            class="upload-area"
+            onclick="document.getElementById('imageFileInput').click()"
+          >
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3 style="font-size: 1.1rem; margin-bottom: 5px">
+              Tải lên bức ảnh chứa từ vựng tiếng Anh
+            </h3>
+            <p style="color: var(--text-sub); font-size: 0.85rem">
+              Hỗ trợ ảnh PNG, JPG, JPEG (Sách, ghi chú, chụp màn hình...)
+            </p>
+            <input
+              type="file"
+              id="imageFileInput"
+              accept="image/*"
+              style="display: none"
+              onchange="processSelectedImage(this)"
+            />
+          </div>
+
+          <div class="loading-spinner" id="ocrLoader">
+            <i class="fa-solid fa-spinner"></i>
+            <div id="ocrStatusText">Đang quét chữ từ bức ảnh của Tunz...</div>
+          </div>
+
+          <div id="ocrResultContainer" style="display: none; margin-top: 20px">
+            <h4
+              style="
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+                color: var(--text-main);
+              "
+            >
+              <i
+                class="fa-solid fa-list-check"
+                style="color: var(--accent-green)"
+              ></i>
+              Danh sách từ vựng nhận diện được
+            </h4>
+
+            <table class="detected-words-table">
+              <thead>
+                <tr>
+                  <th>Từ tiếng Anh</th>
+                  <th>Nghĩa Tiếng Việt (Tự động dịch)</th>
+                </tr>
+              </thead>
+              <tbody id="detectedWordsTbody">
+                <!-- Rows dynamically added here -->
+              </tbody>
+            </table>
+
+            <div style="margin-top: 20px; text-align: right">
+              <button
+                class="btn btn-success"
+                onclick="addOcrWordsToCurrentTopic()"
+              >
+                <i class="fa-solid fa-plus-circle"></i> Lưu danh sách này vào
+                Chủ đề hiện tại
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TAB 4: TOPIC & VOCAB MANAGEMENT ================= -->
+      <div id="topics-tab" class="tab-content">
+        <!-- Add New Topic Form -->
+        <div class="section-card">
+          <div class="section-title" style="margin-bottom: 15px">
+            <i
+              class="fa-solid fa-folder-plus"
+              style="color: var(--primary)"
+            ></i>
+            Tạo chủ đề bài học mới
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <input
+              type="text"
+              id="newTopicInput"
+              placeholder="Ví dụ: Từ vựng Chuyên ngành, IELTS Task 2..."
+              style="flex: 1; min-width: 220px"
+            />
+            <button class="btn" onclick="createNewTopic()">
+              <i class="fa-solid fa-plus"></i> Tạo chủ đề
             </button>
+          </div>
         </div>
 
-        <!-- ================= TAB 1: FLASHCARDS ================= -->
-        <div id="flashcards-tab" class="tab-content active">
-            <div class="flashcard-wrapper">
-                <div class="flashcard" id="mainFlashcard" onclick="flipFlashcard()">
-                    <div class="card-face card-front">
-                        <span class="tag">Tiếng Anh</span>
-                        <button class="btn-sound" onclick="speakCurrentWord(event)" title="Phát âm">
-                            <i class="fa-solid fa-volume-high"></i>
-                        </button>
-                        <div class="card-word" id="cardEnglish">Loading...</div>
-                        <span class="hint-text"><i class="fa-solid fa-rotate"></i> Nhấn để xem nghĩa Tiếng Việt</span>
-                    </div>
-                    <div class="card-face card-back">
-                        <span class="tag">Nghĩa Tiếng Việt</span>
-                        <button class="btn-sound" onclick="speakCurrentWord(event)" title="Phát âm">
-                            <i class="fa-solid fa-volume-high"></i>
-                        </button>
-                        <div class="card-meaning" id="cardVietnamese">Đang tải...</div>
-                        <span class="hint-text"><i class="fa-solid fa-rotate"></i> Nhấn để quay lại</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-controls">
-                <button class="btn btn-secondary" onclick="prevCard()"><i class="fa-solid fa-arrow-left"></i> Trước</button>
-                <div class="card-counter" id="cardCounter">0 / 0</div>
-                <button class="btn" onclick="nextCard()">Tiếp theo <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
+        <!-- List of Topics -->
+        <div class="section-card">
+          <div class="section-title">
+            <i
+              class="fa-solid fa-folder-tree"
+              style="color: var(--primary)"
+            ></i>
+            Danh sách các Chủ đề
+          </div>
+          <div class="grid-topics" id="topicsGridContainer">
+            <!-- Dynamic topic cards -->
+          </div>
         </div>
 
-        <!-- ================= TAB 2: MATCHING GAME ================= -->
-        <div id="game-tab" class="tab-content">
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-title"><i class="fa-solid fa-puzzle-piece" style="color:var(--primary)"></i> Trò chơi nối từ</div>
-                    <button class="btn" onclick="startNewGame()"><i class="fa-solid fa-arrows-rotate"></i> Chơi mới</button>
-                </div>
-                <p style="color:var(--text-sub); font-weight:600; margin-bottom:15px;">
-                    Nối ô Tiếng Anh với nghĩa Tiếng Việt tương ứng nhanh nhất có thể!
-                </p>
-                <div class="game-grid" id="gameGrid"></div>
-            </div>
+        <!-- Add Single Word Manually to Active Topic -->
+        <div class="section-card">
+          <div class="section-title" style="margin-bottom: 15px">
+            <i
+              class="fa-solid fa-pen-to-square"
+              style="color: var(--primary)"
+            ></i>
+            Thêm từ thủ công vào chủ đề hiện tại
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr auto;
+              gap: 12px;
+            "
+          >
+            <input
+              type="text"
+              id="manualEnglish"
+              placeholder="Từ Tiếng Anh (vd: Outstanding)"
+            />
+            <input
+              type="text"
+              id="manualVietnamese"
+              placeholder="Nghĩa Tiếng Việt (vd: Nổi bật, xuất sắc)"
+            />
+            <button class="btn btn-success" onclick="addSingleWordManually()">
+              <i class="fa-solid fa-check"></i> Thêm
+            </button>
+          </div>
+
+          <h4
+            style="
+              margin-top: 25px;
+              margin-bottom: 15px;
+              font-size: 1rem;
+              color: var(--text-sub);
+            "
+          >
+            Danh sách từ trong chủ đề hiện tại:
+          </h4>
+          <div id="currentTopicWordsList">
+            <!-- Dynamic word list -->
+          </div>
         </div>
-
-        <!-- ================= TAB 3: SCAN OCR FROM IMAGE ================= -->
-        <div id="ocr-tab" class="tab-content">
-            <div class="section-card">
-                <div class="section-title" style="margin-bottom:15px;">
-                    <i class="fa-solid fa-file-image" style="color:var(--primary)"></i> Trích xuất & Dịch từ vựng từ ảnh
-                </div>
-                
-                <div class="upload-area" onclick="document.getElementById('imageFileInput').click()">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <h3 style="font-size:1.1rem; margin-bottom:5px;">Tải lên bức ảnh chứa từ vựng tiếng Anh</h3>
-                    <p style="color:var(--text-sub); font-size:0.85rem;">Hỗ trợ ảnh PNG, JPG, JPEG (Sách, ghi chú, chụp màn hình...)</p>
-                    <input type="file" id="imageFileInput" accept="image/*" style="display:none;" onchange="processSelectedImage(this)">
-                </div>
-
-                <div class="loading-spinner" id="ocrLoader">
-                    <i class="fa-solid fa-spinner"></i>
-                    <div id="ocrStatusText">Đang quét chữ từ bức ảnh của Tunz...</div>
-                </div>
-
-                <div id="ocrResultContainer" style="display:none; margin-top:20px;">
-                    <h4 style="font-size:1.1rem; margin-bottom:10px; color:var(--text-main);">
-                        <i class="fa-solid fa-list-check" style="color:var(--accent-green)"></i> Danh sách từ vựng nhận diện được
-                    </h4>
-                    
-                    <table class="detected-words-table">
-                        <thead>
-                            <tr>
-                                <th>Từ tiếng Anh</th>
-                                <th>Nghĩa Tiếng Việt (Tự động dịch)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detectedWordsTbody">
-                            <!-- Rows dynamically added here -->
-                        </tbody>
-                    </table>
-
-                    <div style="margin-top:20px; text-align:right;">
-                        <button class="btn btn-success" onclick="addOcrWordsToCurrentTopic()">
-                            <i class="fa-solid fa-plus-circle"></i> Lưu danh sách này vào Chủ đề hiện tại
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= TAB 4: TOPIC & VOCAB MANAGEMENT ================= -->
-        <div id="topics-tab" class="tab-content">
-            <!-- Add New Topic Form -->
-            <div class="section-card">
-                <div class="section-title" style="margin-bottom:15px;"><i class="fa-solid fa-folder-plus" style="color:var(--primary)"></i> Tạo chủ đề bài học mới</div>
-                <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                    <input type="text" id="newTopicInput" placeholder="Ví dụ: Từ vựng Chuyên ngành, IELTS Task 2..." style="flex:1; min-width:220px;">
-                    <button class="btn" onclick="createNewTopic()"><i class="fa-solid fa-plus"></i> Tạo chủ đề</button>
-                </div>
-            </div>
-
-            <!-- List of Topics -->
-            <div class="section-card">
-                <div class="section-title"><i class="fa-solid fa-folder-tree" style="color:var(--primary)"></i> Danh sách các Chủ đề</div>
-                <div class="grid-topics" id="topicsGridContainer">
-                    <!-- Dynamic topic cards -->
-                </div>
-            </div>
-
-            <!-- Add Single Word Manually to Active Topic -->
-            <div class="section-card">
-                <div class="section-title" style="margin-bottom:15px;"><i class="fa-solid fa-pen-to-square" style="color:var(--primary)"></i> Thêm từ thủ công vào chủ đề hiện tại</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:12px;">
-                    <input type="text" id="manualEnglish" placeholder="Từ Tiếng Anh (vd: Outstanding)">
-                    <input type="text" id="manualVietnamese" placeholder="Nghĩa Tiếng Việt (vd: Nổi bật, xuất sắc)">
-                    <button class="btn btn-success" onclick="addSingleWordManually()"><i class="fa-solid fa-check"></i> Thêm</button>
-                </div>
-
-                <h4 style="margin-top:25px; margin-bottom:15px; font-size:1rem; color:var(--text-sub);">
-                    Danh sách từ trong chủ đề hiện tại:
-                </h4>
-                <div id="currentTopicWordsList">
-                    <!-- Dynamic word list -->
-                </div>
-            </div>
-        </div>
-
+      </div>
     </div>
 
     <script>
-        // INITIAL DATA STRUCTURE (Stored in LocalStorage)
-        let appData = JSON.parse(localStorage.getItem('tunz_quizlet_data')) || {
-            activeTopicId: 'topic_1',
-            topics: [
-                {
-                    id: 'topic_1',
-                    name: 'Giao tiếp hàng ngày 💬',
-                    words: [
-                        { english: 'Opportunity', vietnamese: 'Cơ hội' },
-                        { english: 'Knowledge', vietnamese: 'Kiến thức' },
-                        { english: 'Challenge', vietnamese: 'Thử thách' },
-                        { english: 'Inspiration', vietnamese: 'Nguồn cảm hứng' }
-                    ]
-                },
-                {
-                    id: 'topic_2',
-                    name: 'IELTS Vocabulary 🎓',
-                    words: [
-                        { english: 'Aesthetic', vietnamese: 'Tính thẩm mỹ' },
-                        { english: 'Meticulous', vietnamese: 'Tỉ mỉ, cẩn thận' },
-                        { english: 'Ubiquitous', vietnamese: 'Phổ biến khắp nơi' }
-                    ]
-                }
-            ]
-        };
+      // INITIAL DATA STRUCTURE (Stored in LocalStorage)
+      let appData = JSON.parse(localStorage.getItem("tunz_quizlet_data")) || {
+        activeTopicId: "topic_1",
+        topics: [
+          {
+            id: "topic_1",
+            name: "Giao tiếp hàng ngày 💬",
+            words: [
+              { english: "Opportunity", vietnamese: "Cơ hội" },
+              { english: "Knowledge", vietnamese: "Kiến thức" },
+              { english: "Challenge", vietnamese: "Thử thách" },
+              { english: "Inspiration", vietnamese: "Nguồn cảm hứng" },
+              { english: "Confidence", vietnamese: "Sự tự tin" },
+            ],
+          },
+          {
+            id: "topic_2",
+            name: "IELTS Vocabulary 🎓",
+            words: [
+              { english: "Aesthetic", vietnamese: "Tính thẩm mỹ" },
+              { english: "Meticulous", vietnamese: "Tỉ mỉ, cẩn thận" },
+              { english: "Ubiquitous", vietnamese: "Phổ biến khắp nơi" },
+            ],
+          },
+        ],
+      };
 
-        let currentCardIndex = 0;
-        let detectedWordsCache = [];
+      let currentCardIndex = 0;
+      let currentGameMode = "quiz"; // 'quiz' or 'matching'
+      let detectedWordsCache = [];
 
-        // Save data to LocalStorage
-        function saveData() {
-            localStorage.setItem('tunz_quizlet_data', JSON.stringify(appData));
-            updateHeaderTopicSelect();
-            renderTopicsList();
-            renderCurrentTopicWordsList();
+      // Save data to LocalStorage
+      function saveData() {
+        localStorage.setItem("tunz_quizlet_data", JSON.stringify(appData));
+        updateHeaderTopicSelect();
+        renderTopicsList();
+        renderCurrentTopicWordsList();
+      }
+
+      // Get active topic object
+      function getActiveTopic() {
+        return (
+          appData.topics.find((t) => t.id === appData.activeTopicId) ||
+          appData.topics[0]
+        );
+      }
+
+      // Initialize App
+      window.addEventListener("DOMContentLoaded", () => {
+        saveData();
+        loadFlashcard();
+      });
+
+      // Switch Tabs
+      function switchTab(tabId) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((el) => el.classList.remove("active"));
+
+        document.getElementById(tabId).classList.add("active");
+        event.currentTarget.classList.add("active");
+
+        if (tabId === "flashcards-tab") loadFlashcard();
+        if (tabId === "game-tab") restartCurrentGame();
+      }
+
+      // Header Topic Select Handler
+      function updateHeaderTopicSelect() {
+        const select = document.getElementById("headerTopicSelect");
+        select.innerHTML = appData.topics
+          .map(
+            (t) =>
+              `<option value="${t.id}" ${t.id === appData.activeTopicId ? "selected" : ""}>${t.name} (${t.words.length} từ)</option>`,
+          )
+          .join("");
+      }
+
+      function changeActiveTopic(topicId) {
+        appData.activeTopicId = topicId;
+        currentCardIndex = 0;
+        saveData();
+        loadFlashcard();
+        if (document.getElementById("game-tab").classList.contains("active")) {
+          restartCurrentGame();
+        }
+      }
+
+      // ================= FLASHCARD CONTROLLER =================
+      function loadFlashcard() {
+        const topic = getActiveTopic();
+        const cardEl = document.getElementById("mainFlashcard");
+        cardEl.classList.remove("flipped");
+
+        if (!topic || topic.words.length === 0) {
+          document.getElementById("cardEnglish").innerText = "Chưa có từ nào";
+          document.getElementById("cardVietnamese").innerText =
+            "Vui lòng thêm từ vựng mới!";
+          document.getElementById("cardCounter").innerText = "0 / 0";
+          return;
         }
 
-        // Get active topic object
-        function getActiveTopic() {
-            return appData.topics.find(t => t.id === appData.activeTopicId) || appData.topics[0];
+        if (currentCardIndex >= topic.words.length) currentCardIndex = 0;
+        if (currentCardIndex < 0) currentCardIndex = topic.words.length - 1;
+
+        const item = topic.words[currentCardIndex];
+        document.getElementById("cardEnglish").innerText = item.english;
+        document.getElementById("cardVietnamese").innerText = item.vietnamese;
+        document.getElementById("cardCounter").innerText =
+          `${currentCardIndex + 1} / ${topic.words.length}`;
+      }
+
+      function flipFlashcard() {
+        document.getElementById("mainFlashcard").classList.toggle("flipped");
+      }
+
+      function nextCard() {
+        const topic = getActiveTopic();
+        if (!topic || topic.words.length === 0) return;
+        currentCardIndex = (currentCardIndex + 1) % topic.words.length;
+        loadFlashcard();
+      }
+
+      function prevCard() {
+        const topic = getActiveTopic();
+        if (!topic || topic.words.length === 0) return;
+        currentCardIndex =
+          (currentCardIndex - 1 + topic.words.length) % topic.words.length;
+        loadFlashcard();
+      }
+
+      function speakCurrentWord(e) {
+        if (e) e.stopPropagation();
+        const topic = getActiveTopic();
+        if (!topic || topic.words.length === 0) return;
+        const word = topic.words[currentCardIndex].english;
+
+        const speech = new SpeechSynthesisUtterance(word);
+        speech.lang = "en-US";
+        speech.rate = 0.9;
+        window.speechSynthesis.speak(speech);
+      }
+
+      // ================= GAMES CONTROLLER =================
+      function switchGameMode(mode) {
+        currentGameMode = mode;
+        document
+          .getElementById("btnModeQuiz")
+          .classList.toggle("active", mode === "quiz");
+        document
+          .getElementById("btnModeMatching")
+          .classList.toggle("active", mode === "matching");
+
+        document.getElementById("quizGameContainer").style.display =
+          mode === "quiz" ? "block" : "none";
+        document.getElementById("matchingGameContainer").style.display =
+          mode === "matching" ? "block" : "none";
+
+        restartCurrentGame();
+      }
+
+      function restartCurrentGame() {
+        if (currentGameMode === "quiz") {
+          initQuizGame();
+        } else {
+          startMatchingGame();
+        }
+      }
+
+      // --- MODE 1: MULTIPLE CHOICE QUIZ (3 OPTIONS) ---
+      let quizWordsList = [];
+      let quizCurrentIndex = 0;
+      let quizScore = 0;
+
+      function initQuizGame() {
+        const topic = getActiveTopic();
+        const container = document.getElementById("quizGameContainer");
+
+        if (!topic || topic.words.length < 3) {
+          container.innerHTML = `<p style="padding:30px; text-align:center; color:var(--text-sub);">
+                    Chủ đề này cần <strong>ít nhất 3 từ vựng</strong> để chơi trò chơi trắc nghiệm 3 phương án.<br>Tunz hãy thêm từ vựng nhé!
+                </p>`;
+          return;
         }
 
-        // Initialize App
-        window.addEventListener('DOMContentLoaded', () => {
-            saveData();
-            loadFlashcard();
+        // Shuffle words for quiz questions
+        quizWordsList = [...topic.words].sort(() => 0.5 - Math.random());
+        quizCurrentIndex = 0;
+        quizScore = 0;
+        renderQuizQuestion();
+      }
+
+      function renderQuizQuestion() {
+        const topic = getActiveTopic();
+        const container = document.getElementById("quizGameContainer");
+
+        if (quizCurrentIndex >= quizWordsList.length) {
+          // Game Finished Screen
+          container.innerHTML = `
+                    <div style="background:white; border-radius:var(--radius-lg); padding:40px; border:2px solid var(--border); text-align:center;">
+                        <i class="fa-solid fa-trophy" style="font-size:3.5rem; color:var(--secondary); margin-bottom:15px;"></i>
+                        <h2 style="color:var(--text-main); font-size:1.8rem; margin-bottom:10px;">Chúc mừng Tunz đã hoàn thành!</h2>
+                        <p style="font-size:1.1rem; color:var(--text-sub); margin-bottom:20px;">
+                            Số điểm của bạn: <strong style="color:var(--primary); font-size:1.4rem;">${quizScore} / ${quizWordsList.length}</strong>
+                        </p>
+                        <button class="btn" onclick="initQuizGame()"><i class="fa-solid fa-rotate-right"></i> Chơi lại bài này</button>
+                    </div>
+                `;
+          return;
+        }
+
+        // Restore HTML structure if returning from completed screen
+        container.innerHTML = `
+                <div class="quiz-score-header">
+                    <span>Câu hỏi: <span id="quizCurrentIndex">1</span>/<span id="quizTotalCount">0</span></span>
+                    <span>Điểm: <span id="quizScoreText" style="color:var(--primary); font-size:1.1rem;">0</span></span>
+                </div>
+
+                <div class="quiz-word-box">
+                    <button class="btn-sound" onclick="speakQuizWord()" style="position:absolute; top:15px; right:15px; background:white; border:none; color:var(--primary); width:36px; height:36px; border-radius:50%; cursor:pointer;">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <span style="font-weight:700; color:var(--text-sub); font-size:0.85rem; text-transform:uppercase;">Nghĩa của từ này là gì?</span>
+                    <h2 id="quizQuestionWord" style="margin-top:10px;">Word</h2>
+                </div>
+
+                <div class="quiz-options" id="quizOptionsContainer"></div>
+            `;
+
+        const currentWord = quizWordsList[quizCurrentIndex];
+        document.getElementById("quizCurrentIndex").innerText =
+          quizCurrentIndex + 1;
+        document.getElementById("quizTotalCount").innerText =
+          quizWordsList.length;
+        document.getElementById("quizScoreText").innerText = quizScore;
+        document.getElementById("quizQuestionWord").innerText =
+          currentWord.english;
+
+        // Prepare 3 Options (1 Correct + 2 Distractors)
+        let distractors = topic.words.filter(
+          (w) => w.english !== currentWord.english,
+        );
+        distractors.sort(() => 0.5 - Math.random());
+
+        let options = [currentWord, distractors[0], distractors[1]];
+        options.sort(() => 0.5 - Math.random()); // Randomize options order
+
+        const optionsContainer = document.getElementById(
+          "quizOptionsContainer",
+        );
+        const prefixes = ["A", "B", "C"];
+
+        optionsContainer.innerHTML = options
+          .map(
+            (opt, idx) => `
+                <button class="quiz-option-btn" onclick="handleQuizAnswer('${opt.english.replace(/'/g, "\'")}', this)">
+                    <span class="opt-badge">${prefixes[idx]}</span>
+                    <span>${opt.vietnamese}</span>
+                </button>
+            `,
+          )
+          .join("");
+      }
+
+      function speakQuizWord() {
+        const currentWord = quizWordsList[quizCurrentIndex]?.english;
+        if (currentWord) {
+          const speech = new SpeechSynthesisUtterance(currentWord);
+          speech.lang = "en-US";
+          window.speechSynthesis.speak(speech);
+        }
+      }
+
+      function handleQuizAnswer(selectedEnglishWord, btnElement) {
+        const currentWord = quizWordsList[quizCurrentIndex];
+        const allOptionBtns = document.querySelectorAll(".quiz-option-btn");
+        allOptionBtns.forEach((btn) => (btn.style.pointerEvents = "none")); // Disable clicking while evaluating
+
+        if (selectedEnglishWord === currentWord.english) {
+          btnElement.classList.add("correct");
+          quizScore++;
+        } else {
+          btnElement.classList.add("wrong");
+          // Highlight correct answer
+          allOptionBtns.forEach((btn) => {
+            if (btn.innerText.includes(currentWord.vietnamese)) {
+              btn.classList.add("correct");
+            }
+          });
+        }
+
+        setTimeout(() => {
+          quizCurrentIndex++;
+          renderQuizQuestion();
+        }, 1200);
+      }
+
+      // --- MODE 2: MATCHING GAME ---
+      let gameSelectedCards = [];
+
+      function startMatchingGame() {
+        const grid = document.getElementById("gameGrid");
+        grid.innerHTML = "";
+        gameSelectedCards = [];
+
+        const topic = getActiveTopic();
+        if (!topic || topic.words.length < 2) {
+          grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding:20px;">
+                    Chủ đề này cần ít nhất 2 từ vựng để chơi game. Vui lòng thêm từ vựng nhé!
+                </p>`;
+          return;
+        }
+
+        // Pick up to 6 random words
+        let shuffleWords = [...topic.words]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 6);
+        let cards = [];
+
+        shuffleWords.forEach((item, index) => {
+          cards.push({ id: index, text: item.english, type: "eng" });
+          cards.push({ id: index, text: item.vietnamese, type: "vie" });
         });
 
-        // Switch Tabs
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+        cards.sort(() => 0.5 - Math.random());
 
-            if (tabId === 'flashcards-tab') loadFlashcard();
-            if (tabId === 'game-tab') startNewGame();
+        cards.forEach((card) => {
+          const div = document.createElement("div");
+          div.className = "game-card";
+          div.innerText = card.text;
+          div.dataset.id = card.id;
+          div.dataset.type = card.type;
+          div.onclick = () => handleGameCardClick(div);
+          grid.appendChild(div);
+        });
+      }
+
+      function handleGameCardClick(card) {
+        if (
+          card.classList.contains("selected") ||
+          card.classList.contains("matched")
+        )
+          return;
+
+        card.classList.add("selected");
+        gameSelectedCards.push(card);
+
+        if (gameSelectedCards.length === 2) {
+          const [c1, c2] = gameSelectedCards;
+          if (
+            c1.dataset.id === c2.dataset.id &&
+            c1.dataset.type !== c2.dataset.type
+          ) {
+            setTimeout(() => {
+              c1.classList.add("matched");
+              c2.classList.add("matched");
+              gameSelectedCards = [];
+              checkGameWin();
+            }, 300);
+          } else {
+            setTimeout(() => {
+              c1.classList.remove("selected");
+              c2.classList.remove("selected");
+              gameSelectedCards = [];
+            }, 700);
+          }
         }
+      }
 
-        // Header Topic Select Handler
-        function updateHeaderTopicSelect() {
-            const select = document.getElementById('headerTopicSelect');
-            select.innerHTML = appData.topics.map(t => 
-                `<option value="${t.id}" ${t.id === appData.activeTopicId ? 'selected' : ''}>${t.name} (${t.words.length} từ)</option>`
-            ).join('');
+      function checkGameWin() {
+        const remaining = document.querySelectorAll(".game-card:not(.matched)");
+        if (remaining.length === 0) {
+          setTimeout(() => {
+            alert(
+              "🎉 Xuất sắc quá Tunz ơi! Bạn đã hoàn thành tất cả các cặp từ!",
+            );
+          }, 300);
         }
+      }
 
-        function changeActiveTopic(topicId) {
-            appData.activeTopicId = topicId;
-            currentCardIndex = 0;
-            saveData();
-            loadFlashcard();
-            if (document.getElementById('game-tab').classList.contains('active')) {
-                startNewGame();
-            }
+      // ================= OCR SCAN & AUTO-TRANSLATE =================
+      async function processSelectedImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const loader = document.getElementById("ocrLoader");
+        const statusText = document.getElementById("ocrStatusText");
+        const resultBox = document.getElementById("ocrResultContainer");
+
+        loader.style.display = "block";
+        resultBox.style.display = "none";
+        statusText.innerText = "Đang quét chữ tiếng Anh từ hình ảnh...";
+
+        try {
+          // Perform OCR using Tesseract.js
+          const {
+            data: { text },
+          } = await Tesseract.recognize(file, "eng");
+
+          // Extract unique English words (min length 3)
+          const extractedWords = [
+            ...new Set(text.match(/[a-zA-Z]{3,}/g) || []),
+          ];
+
+          if (extractedWords.length === 0) {
+            alert(
+              "Không tìm thấy từ vựng tiếng Anh hợp lệ nào từ hình ảnh này!",
+            );
+            loader.style.display = "none";
+            return;
+          }
+
+          statusText.innerText = `Đã tìm thấy ${extractedWords.length} từ. Đang tự động dịch sang Tiếng Việt...`;
+
+          // Translate extracted words using Google Translate API
+          detectedWordsCache = [];
+          for (let i = 0; i < Math.min(extractedWords.length, 12); i++) {
+            const eng =
+              extractedWords[i].charAt(0).toUpperCase() +
+              extractedWords[i].slice(1).toLowerCase();
+            const vie = await translateEnglishToVietnamese(eng);
+            detectedWordsCache.push({ english: eng, vietnamese: vie });
+          }
+
+          renderDetectedWordsTable();
+          loader.style.display = "none";
+          resultBox.style.display = "block";
+        } catch (err) {
+          loader.style.display = "none";
+          alert("Có lỗi xảy ra trong quá trình xử lý ảnh: " + err.message);
         }
+      }
 
-        // ================= FLASHCARD CONTROLLER =================
-        function loadFlashcard() {
-            const topic = getActiveTopic();
-            const cardEl = document.getElementById('mainFlashcard');
-            cardEl.classList.remove('flipped');
-
-            if (!topic || topic.words.length === 0) {
-                document.getElementById('cardEnglish').innerText = "Chưa có từ nào";
-                document.getElementById('cardVietnamese').innerText = "Vui lòng thêm từ vựng mới!";
-                document.getElementById('cardCounter').innerText = "0 / 0";
-                return;
-            }
-
-            if (currentCardIndex >= topic.words.length) currentCardIndex = 0;
-            if (currentCardIndex < 0) currentCardIndex = topic.words.length - 1;
-
-            const item = topic.words[currentCardIndex];
-            document.getElementById('cardEnglish').innerText = item.english;
-            document.getElementById('cardVietnamese').innerText = item.vietnamese;
-            document.getElementById('cardCounter').innerText = `${currentCardIndex + 1} / ${topic.words.length}`;
+      async function translateEnglishToVietnamese(word) {
+        try {
+          const res = await fetch(
+            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(word)}`,
+          );
+          const data = await res.json();
+          return data[0][0][0] || "Chưa dịch được";
+        } catch (e) {
+          return "Chưa dịch được";
         }
+      }
 
-        function flipFlashcard() {
-            document.getElementById('mainFlashcard').classList.toggle('flipped');
-        }
-
-        function nextCard() {
-            const topic = getActiveTopic();
-            if (!topic || topic.words.length === 0) return;
-            currentCardIndex = (currentCardIndex + 1) % topic.words.length;
-            loadFlashcard();
-        }
-
-        function prevCard() {
-            const topic = getActiveTopic();
-            if (!topic || topic.words.length === 0) return;
-            currentCardIndex = (currentCardIndex - 1 + topic.words.length) % topic.words.length;
-            loadFlashcard();
-        }
-
-        function speakCurrentWord(e) {
-            e.stopPropagation();
-            const topic = getActiveTopic();
-            if (!topic || topic.words.length === 0) return;
-            const word = topic.words[currentCardIndex].english;
-            
-            const speech = new SpeechSynthesisUtterance(word);
-            speech.lang = 'en-US';
-            speech.rate = 0.9;
-            window.speechSynthesis.speak(speech);
-        }
-
-        // ================= OCR SCAN & AUTO-TRANSLATE =================
-        async function processSelectedImage(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const loader = document.getElementById('ocrLoader');
-            const statusText = document.getElementById('ocrStatusText');
-            const resultBox = document.getElementById('ocrResultContainer');
-
-            loader.style.display = 'block';
-            resultBox.style.display = 'none';
-            statusText.innerText = 'Đang quét chữ tiếng Anh từ hình ảnh...';
-
-            try {
-                // Perform OCR using Tesseract.js
-                const { data: { text } } = await Tesseract.recognize(file, 'eng');
-                
-                // Extract unique English words (min length 3)
-                const extractedWords = [...new Set(text.match(/[a-zA-Z]{3,}/g) || [])];
-
-                if (extractedWords.length === 0) {
-                    alert('Không tìm thấy từ vựng tiếng Anh hợp lệ nào từ hình ảnh này!');
-                    loader.style.display = 'none';
-                    return;
-                }
-
-                statusText.innerText = `Đã tìm thấy ${extractedWords.length} từ. Đang tự động dịch sang Tiếng Việt...`;
-
-                // Translate extracted words using Google Translate API (free public endpoint)
-                detectedWordsCache = [];
-                for (let i = 0; i < Math.min(extractedWords.length, 12); i++) { // Limit max 12 words per batch for performance
-                    const eng = extractedWords[i].charAt(0).toUpperCase() + extractedWords[i].slice(1).toLowerCase();
-                    const vie = await translateEnglishToVietnamese(eng);
-                    detectedWordsCache.push({ english: eng, vietnamese: vie });
-                }
-
-                renderDetectedWordsTable();
-                loader.style.display = 'none';
-                resultBox.style.display = 'block';
-
-            } catch (err) {
-                loader.style.display = 'none';
-                alert('Có lỗi xảy ra trong quá trình xử lý ảnh: ' + err.message);
-            }
-        }
-
-        // Free Google Translate API Endpoint
-        async function translateEnglishToVietnamese(word) {
-            try {
-                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(word)}`);
-                const data = await res.json();
-                return data[0][0][0] || 'Chưa dịch được';
-            } catch (e) {
-                return 'Chưa dịch được';
-            }
-        }
-
-        function renderDetectedWordsTable() {
-            const tbody = document.getElementById('detectedWordsTbody');
-            tbody.innerHTML = detectedWordsCache.map((item, idx) => `
+      function renderDetectedWordsTable() {
+        const tbody = document.getElementById("detectedWordsTbody");
+        tbody.innerHTML = detectedWordsCache
+          .map(
+            (item, idx) => `
                 <tr>
                     <td>${item.english}</td>
                     <td>
                         <input type="text" value="${item.vietnamese}" onchange="detectedWordsCache[${idx}].vietnamese = this.value">
                     </td>
                 </tr>
-            `).join('');
-        }
+            `,
+          )
+          .join("");
+      }
 
-        function addOcrWordsToCurrentTopic() {
-            const topic = getActiveTopic();
-            if (!topic) return;
+      function addOcrWordsToCurrentTopic() {
+        const topic = getActiveTopic();
+        if (!topic) return;
 
-            let addedCount = 0;
-            detectedWordsCache.forEach(item => {
-                if (item.english && item.vietnamese) {
-                    topic.words.push({ english: item.english, vietnamese: item.vietnamese });
-                    addedCount++;
-                }
+        let addedCount = 0;
+        detectedWordsCache.forEach((item) => {
+          if (item.english && item.vietnamese) {
+            topic.words.push({
+              english: item.english,
+              vietnamese: item.vietnamese,
             });
+            addedCount++;
+          }
+        });
 
-            saveData();
-            alert(`Đã thêm thành công ${addedCount} từ vào chủ đề "${topic.name}"!`);
-            switchTab('flashcards-tab');
+        saveData();
+        alert(
+          `Đã thêm thành công ${addedCount} từ vào chủ đề "${topic.name}"!`,
+        );
+        switchTab("flashcards-tab");
+      }
+
+      // ================= TOPIC & WORD MANAGERS =================
+      function createNewTopic() {
+        const input = document.getElementById("newTopicInput");
+        const name = input.value.trim();
+        if (!name) return alert("Vui lòng nhập tên chủ đề!");
+
+        const newTopic = {
+          id: "topic_" + Date.now(),
+          name: name,
+          words: [],
+        };
+
+        appData.topics.push(newTopic);
+        appData.activeTopicId = newTopic.id;
+        input.value = "";
+        saveData();
+        alert(`Đã tạo chủ đề "${name}" thành công!`);
+      }
+
+      function deleteTopic(topicId, e) {
+        e.stopPropagation();
+        if (appData.topics.length <= 1) {
+          return alert("Cần giữ ít nhất 1 chủ đề!");
         }
-
-        // ================= MATCHING GAME LOGIC =================
-        let gameSelectedCards = [];
-
-        function startNewGame() {
-            const grid = document.getElementById('gameGrid');
-            grid.innerHTML = '';
-            gameSelectedCards = [];
-
-            const topic = getActiveTopic();
-            if (!topic || topic.words.length < 2) {
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding:20px;">
-                    Chủ đề này cần ít nhất 2 từ vựng để chơi game. Vui lòng thêm từ vựng nhé!
-                </p>`;
-                return;
-            }
-
-            // Pick up to 6 random words
-            let shuffleWords = [...topic.words].sort(() => 0.5 - Math.random()).slice(0, 6);
-            let cards = [];
-
-            shuffleWords.forEach((item, index) => {
-                cards.push({ id: index, text: item.english, type: 'eng' });
-                cards.push({ id: index, text: item.vietnamese, type: 'vie' });
-            });
-
-            cards.sort(() => 0.5 - Math.random());
-
-            cards.forEach(card => {
-                const div = document.createElement('div');
-                div.className = 'game-card';
-                div.innerText = card.text;
-                div.dataset.id = card.id;
-                div.dataset.type = card.type;
-                div.onclick = () => handleGameCardClick(div);
-                grid.appendChild(div);
-            });
+        if (confirm("Tunz có chắc chắn muốn xóa chủ đề này không?")) {
+          appData.topics = appData.topics.filter((t) => t.id !== topicId);
+          if (appData.activeTopicId === topicId) {
+            appData.activeTopicId = appData.topics[0].id;
+          }
+          saveData();
         }
+      }
 
-        function handleGameCardClick(card) {
-            if (card.classList.contains('selected') || card.classList.contains('matched')) return;
-
-            card.classList.add('selected');
-            gameSelectedCards.push(card);
-
-            if (gameSelectedCards.length === 2) {
-                const [c1, c2] = gameSelectedCards;
-                if (c1.dataset.id === c2.dataset.id && c1.dataset.type !== c2.dataset.type) {
-                    setTimeout(() => {
-                        c1.classList.add('matched');
-                        c2.classList.add('matched');
-                        gameSelectedCards = [];
-                        checkGameWin();
-                    }, 300);
-                } else {
-                    setTimeout(() => {
-                        c1.classList.remove('selected');
-                        c2.classList.remove('selected');
-                        gameSelectedCards = [];
-                    }, 700);
-                }
-            }
-        }
-
-        function checkGameWin() {
-            const remaining = document.querySelectorAll('.game-card:not(.matched)');
-            if (remaining.length === 0) {
-                setTimeout(() => {
-                    alert('🎉 Xuất sắc quá Tunz ơi! Bạn đã hoàn thành tất cả các cặp từ!');
-                }, 300);
-            }
-        }
-
-        // ================= TOPIC & WORD MANAGERS =================
-        function createNewTopic() {
-            const input = document.getElementById('newTopicInput');
-            const name = input.value.trim();
-            if (!name) return alert('Vui lòng nhập tên chủ đề!');
-
-            const newTopic = {
-                id: 'topic_' + Date.now(),
-                name: name,
-                words: []
-            };
-
-            appData.topics.push(newTopic);
-            appData.activeTopicId = newTopic.id;
-            input.value = '';
-            saveData();
-            alert(`Đã tạo chủ đề "${name}" thành công!`);
-        }
-
-        function deleteTopic(topicId, e) {
-            e.stopPropagation();
-            if (appData.topics.length <= 1) {
-                return alert('Cần giữ ít nhất 1 chủ đề!');
-            }
-            if (confirm('Tunz có chắc chắn muốn xóa chủ đề này không?')) {
-                appData.topics = appData.topics.filter(t => t.id !== topicId);
-                if (appData.activeTopicId === topicId) {
-                    appData.activeTopicId = appData.topics[0].id;
-                }
-                saveData();
-            }
-        }
-
-        function renderTopicsList() {
-            const container = document.getElementById('topicsGridContainer');
-            container.innerHTML = appData.topics.map(t => `
-                <div class="topic-card ${t.id === appData.activeTopicId ? 'active' : ''}" onclick="changeActiveTopic('${t.id}')">
+      function renderTopicsList() {
+        const container = document.getElementById("topicsGridContainer");
+        container.innerHTML = appData.topics
+          .map(
+            (t) => `
+                <div class="topic-card ${t.id === appData.activeTopicId ? "active" : ""}" onclick="changeActiveTopic('${t.id}')">
                     <button class="btn-delete-topic" onclick="deleteTopic('${t.id}', event)" title="Xóa chủ đề">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                     <h4>${t.name}</h4>
                     <p>${t.words.length} từ vựng</p>
-                    ${t.id === appData.activeTopicId ? '<span class="badge">Đang chọn</span>' : ''}
+                    ${t.id === appData.activeTopicId ? '<span class="badge">Đang chọn</span>' : ""}
                 </div>
-            `).join('');
+            `,
+          )
+          .join("");
+      }
+
+      function addSingleWordManually() {
+        const eng = document.getElementById("manualEnglish").value.trim();
+        const vie = document.getElementById("manualVietnamese").value.trim();
+
+        if (!eng || !vie)
+          return alert(
+            "Tunz vui lòng điền đủ cả từ Tiếng Anh và Nghĩa Tiếng Việt nhé!",
+          );
+
+        const topic = getActiveTopic();
+        topic.words.push({ english: eng, vietnamese: vie });
+
+        document.getElementById("manualEnglish").value = "";
+        document.getElementById("manualVietnamese").value = "";
+        saveData();
+      }
+
+      function removeWordFromTopic(index) {
+        const topic = getActiveTopic();
+        topic.words.splice(index, 1);
+        saveData();
+      }
+
+      function renderCurrentTopicWordsList() {
+        const topic = getActiveTopic();
+        const container = document.getElementById("currentTopicWordsList");
+
+        if (!topic || topic.words.length === 0) {
+          container.innerHTML =
+            '<p style="color:var(--text-sub);">Chưa có từ nào trong chủ đề này.</p>';
+          return;
         }
 
-        function addSingleWordManually() {
-            const eng = document.getElementById('manualEnglish').value.trim();
-            const vie = document.getElementById('manualVietnamese').value.trim();
-
-            if (!eng || !vie) return alert('Tunz vui lòng điền đủ cả từ Tiếng Anh và Nghĩa Tiếng Việt nhé!');
-
-            const topic = getActiveTopic();
-            topic.words.push({ english: eng, vietnamese: vie });
-            
-            document.getElementById('manualEnglish').value = '';
-            document.getElementById('manualVietnamese').value = '';
-            saveData();
-        }
-
-        function removeWordFromTopic(index) {
-            const topic = getActiveTopic();
-            topic.words.splice(index, 1);
-            saveData();
-        }
-
-        function renderCurrentTopicWordsList() {
-            const topic = getActiveTopic();
-            const container = document.getElementById('currentTopicWordsList');
-            
-            if (!topic || topic.words.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sub);">Chưa có từ nào trong chủ đề này.</p>';
-                return;
-            }
-
-            container.innerHTML = topic.words.map((w, idx) => `
+        container.innerHTML = topic.words
+          .map(
+            (w, idx) => `
                 <div class="vocab-item-row">
                     <div>
                         <strong>${w.english}</strong> : <span>${w.vietnamese}</span>
@@ -765,8 +1619,10 @@
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
-            `).join('');
-        }
+            `,
+          )
+          .join("");
+      }
     </script>
-</body>
+  </body>
 </html>
