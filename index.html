@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Flashcards for Tunz</title>
+    <!-- Tesseract.js cho tính năng đọc chữ từ ảnh -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; }
+
+        header { text-align: center; margin-bottom: 25px; }
+        header h1 { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
+
+        nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab-btn {
+            padding: 10px 20px; border: none; background: #e2e8f0; font-weight: 600;
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn.active, .tab-btn:hover { background: var(--primary); color: white; }
+
+        .tab-content { display: none; max-width: 650px; margin: 0 auto; }
+        .tab-content.active { display: block; }
+
+        /* Form & OCR */
+        .card-box {
+            background: var(--card-bg); padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: 600; display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="file"] {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+        }
+        .btn {
+            background: var(--primary); color: white; padding: 10px 16px; border: none;
+            border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;
+        }
+        .btn:hover { background: var(--primary-hover); }
+
+        /* Flashcard */
+        .flashcard-container { perspective: 1000px; height: 250px; margin-bottom: 20px; }
+        .flashcard {
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transition: transform 0.6s; cursor: pointer;
+        }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            padding: 20px; text-align: center;
+        }
+        .card-back { transform: rotateY(180deg); background: #e0e7ff; }
+        .word { font-size: 2.2rem; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        .meaning { font-size: 1.8rem; font-weight: 600; color: #334155; }
+        .controls { display: flex; justify-content: space-between; align-items: center; }
+        .audio-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; margin-left: 10px; }
+
+        /* Game */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .game-card {
+            background: var(--card-bg); height: 90px; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-weight: 600; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 2px solid transparent; text-align: center; padding: 5px;
+        }
+        .game-card.selected { border-color: var(--primary); background: #e0e7ff; }
+        .game-card.matched { visibility: hidden; }
+
+        #loading { display: none; color: var(--primary); font-weight: bold; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Study Space for Tunz 🎓</h1>
+        <p>Thẻ ghi nhớ & Trò chơi tiếng Anh thông minh</p>
+    </header>
+
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('add-tab')">➕ Thêm từ vựng</button>
+        <button class="tab-btn" onclick="switchTab('cards-tab')">🎴 Flashcards</button>
+        <button class="tab-btn" onclick="switchTab('game-tab')" onclick="initGame()">🎮 Trò chơi</button>
+    </nav>
+
+    <!-- TAB 1: THÊM TỪ VỰNG & OCR TỪ ẢNH -->
+    <div id="add-tab" class="tab-content active">
+        <div class="card-box">
+            <h3>📷 Trích xuất từ vựng từ ảnh</h3>
+            <div class="form-group" style="margin-top:10px;">
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <div id="loading">🔍 Đang quét chữ từ ảnh của Tunz...</div>
+            <div class="form-group" style="margin-top:10px;">
+                <label>Các từ nhận diện được:</label>
+                <input type="text" id="detectedText" placeholder="Kết quả sẽ hiển thị ở đây...">
+            </div>
+        </div>
+
+        <div class="card-box">
+            <h3>📝 Thêm từ vào Bộ Flashcard</h3>
+            <div class="form-group" style="margin-top:10px;">
+                <label>Từ tiếng Anh:</label>
+                <input type="text" id="englishWord" placeholder="Ex: Apple">
+            </div>
+            <div class="form-group">
+                <label>Nghĩa tiếng Việt:</label>
+                <input type="text" id="vietnameseMeaning" placeholder="Ex: Quả táo">
+            </div>
+            <button class="btn" onclick="addWord()">Thêm từ vựng</button>
+        </div>
+    </div>
+
+    <!-- TAB 2: FLASHCARD -->
+    <div id="cards-tab" class="tab-content">
+        <div class="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front">
+                    <div style="display:flex; align-items:center;">
+                        <span class="word" id="cardWord">No Words</span>
+                        <button class="audio-btn" onclick="speakWord(event)">🔊</button>
+                    </div>
+                    <p style="color:#64748b; font-size: 0.9rem; margin-top:10px;">(Nhấp để xem nghĩa)</p>
+                </div>
+                <div class="card-face card-back">
+                    <div class="meaning" id="cardMeaning">Chưa có từ vựng</div>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn" style="width: auto;" onclick="prevCard()">⬅️ Từ trước</button>
+            <span id="cardCounter">0/0</span>
+            <button class="btn" style="width: auto;" onclick="nextCard()">Từ sau ➡️</button>
+        </div>
+    </div>
+
+    <!-- TAB 3: GAME TRÍ NHỚ -->
+    <div id="game-tab" class="tab-content">
+        <div class="card-box">
+            <h3>Ghép từ tiếng Anh với nghĩa tương ứng</h3>
+            <p style="font-size:0.9rem; color:#64748b; margin-bottom: 10px;">Chọn 1 ô Tiếng Anh và 1 ô Tiếng Việt đúng để làm biến mất cặp từ!</p>
+            <button class="btn" onclick="initGame()">Bắt đầu trò chơi mới 🔄</button>
+            <div class="game-grid" id="gameGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu từ vựng mặc định
+        let vocabulary = JSON.parse(localStorage.getItem('tunz_vocab')) || [
+            { english: "Opportunity", vietnamese: "Cơ hội" },
+            { english: "Knowledge", vietnamese: "Kiến thức" },
+            { english: "Challenge", vietnamese: "Thử thách" }
+        ];
+
+        let currentIndex = 0;
+
+        // Lưu từ vựng vào LocalStorage
+        function saveVocab() {
+            localStorage.setItem('tunz_vocab', JSON.stringify(vocabulary));
+        }
+
+        // Chuyển Tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'cards-tab') updateFlashcard();
+            if (tabId === 'game-tab') initGame();
+        }
+
+        // Trích xuất chữ từ Ảnh bằng Tesseract.js
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            Tesseract.recognize(file, 'eng')
+                .then(({ data: { text } }) => {
+                    loading.style.display = 'none';
+                    // Lọc lấy các từ sạch
+                    const cleanText = text.replace(/[^a-zA-Z\s]/g, "").trim();
+                    document.getElementById('detectedText').value = cleanText;
+                    
+                    // Gợi ý tự động điền từ đầu tiên tìm thấy
+                    const words = cleanText.split(/\s+/);
+                    if (words.length > 0 && words[0] !== "") {
+                        document.getElementById('englishWord').value = words[0];
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    alert('Lỗi đọc ảnh: ' + err.message);
+                });
+        });
+
+        // Thêm từ vựng mới
+        function addWord() {
+            const eng = document.getElementById('englishWord').value.trim();
+            const vie = document.getElementById('vietnameseMeaning').value.trim();
+
+            if (!eng || !vie) {
+                alert('Tunz vui lòng nhập đủ cả từ tiếng Anh và nghĩa tiếng Việt nhé!');
+                return;
+            }
+
+            vocabulary.push({ english: eng, vietnamese: vie });
+            saveVocab();
+
+            document.getElementById('englishWord').value = '';
+            document.getElementById('vietnameseMeaning').value = '';
+            alert(`Đã thêm từ "${eng}" thành công!`);
+        }
+
+        // --- FLASHCARD SYSTEM ---
+        function updateFlashcard() {
+            if (vocabulary.length === 0) {
+                document.getElementById('cardWord').innerText = "Trống";
+                document.getElementById('cardMeaning').innerText = "Hãy thêm từ mới!";
+                document.getElementById('cardCounter').innerText = "0/0";
+                return;
+            }
+            const item = vocabulary[currentIndex];
+            document.getElementById('cardWord').innerText = item.english;
+            document.getElementById('cardMeaning').innerText = item.vietnamese;
+            document.getElementById('cardCounter').innerText = `${currentIndex + 1}/${vocabulary.length}`;
+            document.getElementById('flashcard').classList.remove('flipped');
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (vocabulary.length === 0) return;
+            currentIndex = (currentIndex + 1) % vocabulary.length;
+            updateFlashcard();
+        }
+
+        function prevCard() {
+            if (vocabulary.length === 0) return;
+            currentIndex = (currentIndex - 1 + vocabulary.length) % vocabulary.length;
+            updateFlashcard();
+        }
+
+        function speakWord(e) {
+            e.stopPropagation(); // Ngăn hành động lật thẻ khi bấm nút loa
+            const word = vocabulary[currentIndex]?.english;
+            if (word) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // --- GAME SYSTEM ---
+        let selectedCards = [];
+
+        function initGame() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            selectedCards = [];
+
+            if (vocabulary.length < 2) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Tunz cần ít nhất 2 từ vựng để chơi game nhé!</p>';
+                return;
+            }
+
+            // Lấy tối đa 6 từ ngẫu nhiên để làm trò chơi
+            let gameWords = [...vocabulary].sort(() => 0.5 - Math.random()).slice(0, 6);
+            let cardsData = [];
+
+            gameWords.forEach((item, index) => {
+                cardsData.push({ id: index, text: item.english, type: 'eng' });
+                cardsData.push({ id: index, text: item.vietnamese, type: 'vie' });
+            });
+
+            // Trộn các thẻ
+            cardsData.sort(() => 0.5 - Math.random());
+
+            cardsData.forEach(data => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'game-card';
+                cardEl.innerText = data.text;
+                cardEl.dataset.id = data.id;
+                cardEl.dataset.type = data.type;
+                cardEl.onclick = () => handleCardClick(cardEl);
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function handleCardClick(card) {
+            if (card.classList.contains('selected') || card.classList.contains('matched')) return;
+
+            card.classList.add('selected');
+            selectedCards.push(card);
+
+            if (selectedCards.length === 2) {
+                const [card1, card2] = selectedCards;
+                // Kiểm tra xem 2 thẻ có thuộc về cùng 1 từ không (khác loại eng/vie nhưng cùng ID)
+                if (card1.dataset.id === card2.dataset.id && card1.dataset.type !== card2.dataset.type) {
+                    setTimeout(() => {
+                        card1.classList.add('matched');
+                        card2.classList.add('matched');
+                        selectedCards = [];
+                        checkWin();
+                    }, 400);
+                } else {
+                    setTimeout(() => {
+                        card1.classList.remove('selected');
+                        card2.classList.remove('selected');
+                        selectedCards = [];
+                    }, 800);
+                }
+            }
+        }
+
+        function checkWin() {
+            const remaining = document.querySelectorAll('.game-card:not(.matched)');
+            if (remaining.length === 0) {
+                alert('🎉 Xuất sắc quá Tunz ơi! Bạn đã chiến thắng trò chơi!');
+            }
+        }
+    </script>
+</body>
+</html>
